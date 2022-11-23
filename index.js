@@ -24,13 +24,21 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 // main function
 async function run(){
     try{
-        
+        const productCollection = client.db('CarSome-DB').collection('products');
+
+        // all data load from mongodb 
+        app.get('/products', async(req, res)=>{
+            const query = {}
+            const products = await productCollection.find(query).toArray();
+            res.send(products);
+        })
+
     }
     finally{
 
     }
 }
-run()
+run().catch(err => console.log(err))
 
 
 
