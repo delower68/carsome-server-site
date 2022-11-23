@@ -31,7 +31,34 @@ async function run(){
             const query = {}
             const products = await productCollection.find(query).toArray();
             res.send(products);
-        })
+        });
+
+        // data load by microbus 
+        app.get('/microbus', async(req, res)=>{
+            // const query = {}
+            const products = await productCollection.find({categoryName: "microbus"}).toArray();
+            res.send(products);
+        });
+
+
+        // data load by luxuryCar
+        app.get('/luxuryCar', async(req, res)=>{
+            // const query = {}
+            const products = await productCollection.find({categoryName: "luxuryCar"}).toArray();
+            res.send(products);
+        });
+
+
+
+        // data load by electicCar 
+        app.get('/electicCar', async(req, res)=>{
+            // const query = {}
+            const products = await productCollection.find({categoryName: "electicCar"}).toArray();
+            res.send(products);
+        });
+
+
+
 
     }
     finally{
