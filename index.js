@@ -26,6 +26,8 @@ async function run(){
     try{
         const productCollection = client.db('CarSome-DB').collection('products');
         const usersCollection = client.db('CarSome-DB').collection('users');
+        const bookingsCollection = client.db('CarSome-DB').collection('bookings');
+
 
         // all data load from mongodb 
         app.get('/products', async(req, res)=>{
@@ -52,20 +54,26 @@ async function run(){
 
 
         // data load by electicCar 
-        app.get('/electicCar', async(req, res)=>{
+        app.get('/electricCar', async(req, res)=>{
             // const query = {}
             const products = await productCollection.find({categoryName: "electicCar"}).toArray();
             res.send(products);
         });
 
 
-        //post user data in db
+        //post an user data in db
         app.post("/users",  async (req, res) => {
         const user = req.body;
         const result = await usersCollection.insertOne(user);
         res.send(result);
         });
 
+        // post a booking data in md 
+        app.post('/bookings', async(req, res)=>{
+            const bookings = req.body;
+            const result = await bookingsCollection.insertOne(bookings);
+            res.send(result);
+        })
 
 
     }
