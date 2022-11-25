@@ -101,7 +101,28 @@ async function run(){
           });
 
 
-          
+        //   make admin a user 
+        app.put('/users/admin/:id', async(req, res)=>{
+            const decodedEmail = req.decoded.email ;
+            const query = {email: decodedEmail}
+            console.log(req.decoded.email);
+            const  user = await usersCollection.findOne(query)
+            if(user.type !== "admin"){
+                return res.status(403).send({message: "Forbidden access"})
+            }
+            const id = req.params.id ;
+            const filter = {_id: ObjectId(id)};
+
+            const options = {upsert: true};
+
+            const updatedDoc = {
+                $set:{
+                    type: "admin"
+                }
+            }
+            const result = await usersCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+        })
     }
     finally{
 
