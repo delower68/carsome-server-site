@@ -103,13 +103,13 @@ async function run(){
 
         //   make admin a user 
         app.put('/users/admin/:id', async(req, res)=>{
-            const decodedEmail = req.decoded.email ;
-            const query = {email: decodedEmail}
-            console.log(req.decoded.email);
-            const  user = await usersCollection.findOne(query)
-            if(user.type !== "admin"){
-                return res.status(403).send({message: "Forbidden access"})
-            }
+            // const decodedEmail = req.decoded.email ;
+            // const query = {email: decodedEmail}
+            // console.log(req.decoded.email);
+            // const  user = await usersCollection.findOne(query)
+            // if(user.type !== "admin"){
+            //     return res.status(403).send({message: "Forbidden access"})
+            // }
             const id = req.params.id ;
             const filter = {_id: ObjectId(id)};
 
@@ -123,6 +123,45 @@ async function run(){
             const result = await usersCollection.updateOne(filter, updatedDoc, options);
             res.send(result);
         })
+
+
+        // single buyer or seller delete server 
+        app.delete('/user/:id', async(req, res)=>{
+            const id = req.params.id ;
+            const  filter = {_id: ObjectId(id)};
+            const result = await usersCollection.deleteOne(filter);
+            res.send(result); 
+        })
+
+
+        // a single product sent to the database 
+        app.post('/products', async(req, res)=>{
+            const product = req.body ;
+            const result = await productCollection.insertOne(product);
+            res.send(result);
+        })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
     finally{
 
