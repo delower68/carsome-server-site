@@ -53,7 +53,7 @@ async function run(){
 
 
 
-        // data load by electicCar 
+        // data load by electricCar 
         app.get('/electricCar', async(req, res)=>{
             // const query = {}
             const products = await productCollection.find({categoryName: "electicCar"}).toArray();
@@ -101,6 +101,33 @@ async function run(){
           });
 
 
+          //for  get  all  review
+//     app.get("/myProducts", async (req, res) => {
+    
+//         let query = {};
+//         console.log(req.params.email);
+//         if(req.query.email){
+//             query={
+//                 email: req.query.email 
+//             }
+//         }
+//         const cursor = productCollection.find(query);
+//         const myProducts = await cursor.toArray();
+//         res.send(myProducts)
+// });
+app.get("/myProducts", async (req, res) => {
+    const email = req.query.email;
+    console.log(email);
+    const query = {
+      email: email,
+    };
+    const products = await productCollection.find(query).toArray();
+    res.send(products);
+  });
+
+
+
+        
         //   make admin a user 
         app.put('/users/admin/:id', async(req, res)=>{
             // const decodedEmail = req.decoded.email ;
@@ -126,9 +153,19 @@ async function run(){
 
 
         // single buyer or seller delete server 
-        app.delete('/user/:id', async(req, res)=>{
+
+        app.get('/users/:id', async(req, res)=>{
+            const  id = req.params.id ;
+            const filter = {_id: ObjectId(id)};
+            const result = await usersCollection.findOne(filter)
+            res.send(result);
+        })
+
+
+        app.delete('/users/:id', async(req, res)=>{
             const id = req.params.id ;
-            const  filter = {_id: ObjectId(id)};
+            const filter = {_id: ObjectId(id)};
+            console.log(id)
             const result = await usersCollection.deleteOne(filter);
             res.send(result); 
         })
