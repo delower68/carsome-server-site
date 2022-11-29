@@ -2,6 +2,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const stripe = require("stripe")(process.env.STRIPE_SECRET);
 
 
 const app = express();
@@ -27,6 +28,7 @@ async function run(){
         const productCollection = client.db('CarSome-DB').collection('products');
         const usersCollection = client.db('CarSome-DB').collection('users');
         const bookingsCollection = client.db('CarSome-DB').collection('bookings');
+        const paymentsCollection = client.db('CarSome-DB').collection('payment');
 
 
         // all data load from mongodb 
@@ -83,6 +85,61 @@ async function run(){
             const bookings = await bookingsCollection.find(query).toArray();
             res.send(bookings);
         })
+        
+
+
+
+
+        //for payment 
+        app.get('/bookings/:id', async(req, res)=>{
+            const id = req.params.id ;
+            const  query = {_id: ObjectId(id)};
+            const result = await bookingsCollection.findOne(query);
+            res.send(result);
+        })
+
+        
+    // FOR PAYMENT Server
+    app.post('/create-payment-intent', async(req, res)=>{
+        const booking = req.body ;
+        const price = booking.resale_price ;
+        const amount = price * 100 ;
+        
+  
+        const paymentIntent = await stripe.paymentIntents.create({
+          currency: "USD",
+          amount: amount ,
+          "payment_method_types": [
+            "card"
+          ],
+          
+        })
+        res.send({
+          clientSecret: paymentIntent.client_secret 
+        })
+      })
+  
+
+         // payment info saVE 
+    app.post('/payments', async(req, res)=>{
+        const payment = req. body ;
+        const result = await paymentsCollection.insertOne(payment);
+        const id = payment.bookingId ;
+        const filter = {_id: ObjectId(id)};
+        const updatedDoc={
+          $set: {
+            paid: true,
+            transactionId: payment.transactionId
+          }
+        }
+        const updateResult = await bookingsCollection.updateOne(filter, updatedDoc)
+        res.send(updateResult); 
+  
+      })
+
+
+
+
 
         // delete a booking from UI 
         app.delete('/bookings/:id', async(req, res)=>{
@@ -90,6 +147,15 @@ async function run(){
             const  filter = {_id: ObjectId(id)};
             const result = await bookingsCollection.deleteOne(filter);
             res.send(result);
+        })
+
+        // delete a seller or buyer from UI 
+        app.delete('/users/:id', async(req, res)=>{
+            const id = req.params.id ;
+            const  filter = {_id: ObjectId(id)};
+            const result = await usersCollection.deleteOne(filter);
+            res.send(result);
+
         })
 
 
@@ -101,20 +167,7 @@ async function run(){
           });
 
 
-          //for  get  all  review
-//     app.get("/myProducts", async (req, res) => {
-    
-//         let query = {};
-//         console.log(req.params.email);
-//         if(req.query.email){
-//             query={
-//                 email: req.query.email 
-//             }
-//         }
-//         const cursor = productCollection.find(query);
-//         const myProducts = await cursor.toArray();
-//         res.send(myProducts)
-// });
+          //for  get  each seller products 
 app.get("/myProducts", async (req, res) => {
     const email = req.query.email;
     console.log(email);
